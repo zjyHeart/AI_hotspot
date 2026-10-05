@@ -4,9 +4,9 @@ import { ServiceError, requestJson, type Fetcher } from "./http";
 import { reserveAI, finishAI } from "./ai-budget";
 import { safeError } from "./http";
 
-export function packyEndpoint(baseUrl: string) {
+export function openRouterEndpoint(baseUrl: string) {
   const url = new URL(baseUrl);
-  const allowed = ["cf.api.fan", "www.packyapi.ai", "www.packyapi.com"];
+  const allowed = ["openrouter.ai"];
   if (
     url.protocol !== "https:" ||
     !allowed.includes(url.hostname) ||
@@ -16,11 +16,11 @@ export function packyEndpoint(baseUrl: string) {
     url.search ||
     url.hash
   )
-    throw new ServiceError("请使用官方 PackyAPI HTTPS 地址", 400);
+    throw new ServiceError("请使用官方 OpenRouter HTTPS 地址", 400);
   const path = url.pathname.replace(/\/+$/, "");
-  if (path !== "" && path !== "/v1")
-    throw new ServiceError("PackyAPI 地址应填写域名或域名/v1", 400);
-  return `${url.origin}/v1/chat/completions`;
+  if (path !== "" && path !== "/api/v1")
+    throw new ServiceError("OpenRouter 地址应填写 https://openrouter.ai/api/v1", 400);
+  return `${url.origin}/api/v1/chat/completions`;
 }
 export async function aiCompletion(
   messages: { role: string; content: string }[],
@@ -29,15 +29,15 @@ export async function aiCompletion(
   fetcher: Fetcher = fetch,
   context?: { stage: string; jobId: string },
 ) {
-  if (!process.env.PACKY_API_KEY)
+  if (!process.env.OPENROUTER_API_KEY)
     throw new ServiceError(
-      "PackyAPI 未配置；已采集内容保留，请填写 PACKY_API_KEY",
+      "OpenRouter 未配置；已采集内容保留，请填写 OPENROUTER_API_KEY",
       503,
     );
   const settings = getSettings();
   if (!settings.model)
     throw new ServiceError(
-      "请在连接设置中填写 PackyAPI 令牌分组可用的模型 ID",
+      "请在连接设置中填写 OpenRouter 模型页面中的完整模型 ID（vendor/model）",
       400,
     );
   const system = [
@@ -53,15 +53,14 @@ export async function aiCompletion(
     max_tokens: maxTokens,
     stream: false,
   };
-  // This parameter is verified with Packy's deepseek-v4-pro only. Other models
-  // and connection/baseline checks retain their configured protocol.
+  // OpenRouter's unified reasoning field; model-default mode omits it.
+  // Concrete models that mandate reasoning can reject enabled=false.
   if (
-    settings.model === "deepseek-v4-pro" &&
     settings.thinkingMode === "disabled" &&
     context &&
     ["screen", "deep"].includes(context.stage)
   )
-    body.thinking = { type: "disabled" };
+    body.reasoning = { enabled: false };
   if (settings.outputMode === "json_schema")
     body.response_format = {
       type: "json_schema",
@@ -69,7 +68,7 @@ export async function aiCompletion(
     };
   else if (settings.outputMode === "json_object")
     body.response_format = { type: "json_object" };
-  const endpoint = packyEndpoint(settings.baseUrl);
+  const endpoint = openRouterEndpoint(settings.baseUrl);
   const reservation = context
     ? reserveAI(
         context.stage,
@@ -84,7 +83,7 @@ export async function aiCompletion(
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.PACKY_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
@@ -105,7 +104,7 @@ export async function aiCompletion(
       })
       .safeParse(raw);
     if (!response.success)
-      throw new ServiceError("PackyAPI 返回无效的 Chat Completions 响应");
+      throw new ServiceError("OpenRouter 返回无效的 Chat Completions 响应");
     usage = response.data.usage?.total_tokens ?? null;
     if (response.data.choices[0].finish_reason === "length")
       throw new ServiceError("AI 输出被截断，请减小分析批次后重试");

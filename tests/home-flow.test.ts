@@ -12,7 +12,7 @@ import { POST, GET } from "../src/app/api/[...path]/route";
 
 beforeEach(() => {
   vi.stubEnv("DATABASE_URL", "/tmp/signal-home-test-" + randomUUID() + ".db");
-  for (const key of ["PACKY_API_KEY", "TWITTERAPI_API_KEY", "SERPAPI_API_KEY", "SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD", "EMAIL_FROM", "EMAIL_TO"]) vi.stubEnv(key, "");
+  for (const key of ["OPENROUTER_API_KEY", "TWITTERAPI_API_KEY", "SERPAPI_API_KEY", "SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD", "EMAIL_FROM", "EMAIL_TO"]) vi.stubEnv(key, "");
 });
 afterEach(() => { vi.unstubAllEnvs(); });
 const create = () => saveMonitor(monitorInput.parse({ name: "我的频道", kind: "topic", keywords: "coding agent", sources: ["x"], active: false }));

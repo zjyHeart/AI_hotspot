@@ -1397,7 +1397,7 @@ export default function Desk() {
                           ? "连接 X 与 AI，让信号开始流动。"
                           : !data.health.x
                             ? "X 尚未连接，填写 twitterapi.io Key 即可开启。"
-                            : "原始内容会保留，连接 PackyAPI 后开始 AI 分析。"}
+                            : "原始内容会保留，连接 OpenRouter 后开始 AI 分析。"}
                       </span>
                       <button onClick={() => setView("settings")}>
                         完成连接
@@ -1852,10 +1852,10 @@ export default function Desk() {
                           {
                             id: "ai",
                             title: "AI 分析",
-                            subtitle: "PackyAPI · 语义理解、事件聚合与证据判断",
+                            subtitle: "OpenRouter · 语义理解、事件聚合与证据判断",
                             ok: data.health.ai,
                             icon: "activity",
-                            key: "PACKY_API_KEY / AI_MODEL",
+                            key: "OPENROUTER_API_KEY / AI_MODEL",
                             test: "测试 AI 连接",
                           },
                           {
@@ -1968,7 +1968,7 @@ export default function Desk() {
                             <small>已有频道在编辑窗口中单独调整。</small>
                           </label>
                           <label>
-                            PackyAPI 模型
+                            OpenRouter 模型
                             <input
                               value={(draft || data.settings).model}
                               onChange={(e) =>
@@ -1981,12 +1981,12 @@ export default function Desk() {
                               maxLength={150}
                             />
                             <small>
-                              填写 Packy 控制台中令牌分组对应的模型
+                              填写 OpenRouter 模型页面中的完整模型
                               ID，不沿用其他平台的模型名称。
                             </small>
                           </label>
                           <label>
-                            PackyAPI 接口地址
+                            OpenRouter 接口地址
                             <input
                               value={(draft || data.settings).baseUrl}
                               onChange={(e) =>
@@ -1998,8 +1998,8 @@ export default function Desk() {
                               required
                             />
                             <small>
-                              官方文档推荐 https://cf.api.fan/v1；支持填写
-                              www.packyapi.ai/v1 并测试。
+                              接口地址 https://openrouter.ai/api/v1；按所选模型
+                              支持的输出模式测试连接。
                             </small>
                           </label>
                           <label>
@@ -2214,7 +2214,7 @@ export default function Desk() {
                           <strong>填写本机配置</strong>
                           <p>
                             在项目根目录的 <code>.env.local</code> 中填写
-                            X、PackyAPI 及可选 SerpAPI Key、SMTP
+                            X、OpenRouter 及可选 SerpAPI Key、SMTP
                             信息与收件地址。
                           </p>
                         </li>

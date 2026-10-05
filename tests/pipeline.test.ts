@@ -17,7 +17,7 @@ import {
   hotspotScore,
   validateEvidence,
 } from "../src/server/ai";
-import { packyEndpoint, aiCompletion } from "../src/server/ai-client";
+import { openRouterEndpoint, aiCompletion } from "../src/server/ai-client";
 import {
   saveMonitor,
   dashboard,
@@ -129,10 +129,10 @@ function pipelineFetcher(aiData: unknown = { events: [event()] }) {
 beforeEach(() => {
   vi.stubEnv("DATABASE_URL", `/tmp/signal-desk-test-${randomUUID()}.db`);
   vi.stubEnv("TWITTERAPI_API_KEY", "test-x-secret");
-  vi.stubEnv("PACKY_API_KEY", "test-packy-secret");
+  vi.stubEnv("OPENROUTER_API_KEY", "test-openrouter-secret");
   vi.stubEnv("AI_MODEL", "test-model");
   vi.stubEnv("AI_OUTPUT_MODE", "json_schema");
-  vi.stubEnv("PACKY_BASE_URL", "https://cf.api.fan/v1");
+  vi.stubEnv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1");
   for (const key of [
     "SMTP_HOST",
     "SMTP_USER",
@@ -279,25 +279,25 @@ describe("X 时间窗口与分页", () => {
     expect(query.split("since_time:")).toHaveLength(2);
   });
 });
-describe("PackyAPI 兼容协议与证据校验", () => {
-  it("规范化 /v1，限制凭证发送目标", () => {
-    expect(packyEndpoint("https://www.packyapi.ai")).toBe(
-      "https://www.packyapi.ai/v1/chat/completions",
+describe("OpenRouter 兼容协议与证据校验", () => {
+  it("规范化 /api/v1，限制凭证发送目标", () => {
+    expect(openRouterEndpoint("https://openrouter.ai")).toBe(
+      "https://openrouter.ai/api/v1/chat/completions",
     );
-    expect(packyEndpoint("https://cf.api.fan/v1/")).toBe(
-      "https://cf.api.fan/v1/chat/completions",
+    expect(openRouterEndpoint("https://openrouter.ai/api/v1/")).toBe(
+      "https://openrouter.ai/api/v1/chat/completions",
     );
-    expect(() => packyEndpoint("https://attacker.test/v1")).toThrow();
+    expect(() => openRouterEndpoint("https://attacker.test/v1")).toThrow();
     expect(() =>
-      packyEndpoint("https://user:password@cf.api.fan/v1"),
+      openRouterEndpoint("https://user:password@openrouter.ai/api/v1"),
     ).toThrow();
   });
-  it("请求不携带 OpenRouter 参数，模型名称按配置透传", async () => {
+  it("OpenRouter 模型 ID 按配置透传，不发送排名请求头", async () => {
     const f = pipelineFetcher();
     await analyze(m(), [a()], [], f);
     const calls = (f as unknown as ReturnType<typeof vi.fn>).mock.calls;
     const [url, init] = calls[0];
-    expect(url).toBe("https://cf.api.fan/v1/chat/completions");
+    expect(url).toBe("https://openrouter.ai/api/v1/chat/completions");
     const body = JSON.parse(init.body);
     expect(body.model).toBe("test-model");
     expect(body.provider).toBeUndefined();
@@ -706,9 +706,9 @@ describe("SMTP 投递与本机数据保护", () => {
   it("错误信息隐藏 API Key 与邮箱凭证", () => {
     vi.stubEnv("SMTP_PASSWORD", "secret-password");
     const message = safeError(
-      new Error("Bearer test-packy-secret secret-password"),
+      new Error("Bearer test-openrouter-secret secret-password"),
     );
-    expect(message).not.toContain("test-packy-secret");
+    expect(message).not.toContain("test-openrouter-secret");
     expect(message).not.toContain("secret-password");
   });
 });

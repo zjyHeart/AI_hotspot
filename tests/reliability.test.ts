@@ -113,7 +113,7 @@ beforeEach(() => {
   vi.stubEnv("DATABASE_URL", "/tmp/signal-reliability-" + randomUUID() + ".db");
   vi.stubEnv("SERPAPI_API_KEY", "test-serp-secret");
   vi.stubEnv("TWITTERAPI_API_KEY", "test-x-secret");
-  vi.stubEnv("PACKY_API_KEY", "test-ai-secret");
+  vi.stubEnv("OPENROUTER_API_KEY", "test-ai-secret");
   vi.stubEnv("AI_MODEL", "test-model");
   vi.stubEnv("AI_OUTPUT_MODE", "json_object");
   for (const key of [

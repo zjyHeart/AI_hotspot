@@ -213,9 +213,8 @@ export function AnalysisSettings({
   return (
     <div className="search-budget">
       <h3>分阶段分析与预算</h3>
-      {value.model === "deepseek-v4-pro" && (
-        <label>
-          分析输出模式
+      <label>
+          模型推理模式
           <select
             value={value.thinkingMode}
             onChange={(e) =>
@@ -225,14 +224,13 @@ export function AnalysisSettings({
               })
             }
           >
-            <option value="disabled">稳定输出（推荐）</option>
+            <option value="disabled">请求关闭推理（需模型支持）</option>
             <option value="auto">使用模型默认思考模式</option>
           </select>
           <small>
-            稳定模式通过分阶段任务核验；默认思考模式可能增加耗时和截断。
+            默认遵循模型设置；关闭推理需模型支持，强制推理模型可能拒绝请求。
           </small>
-        </label>
-      )}
+      </label>
       <label className="check-label">
         <input
           type="checkbox"

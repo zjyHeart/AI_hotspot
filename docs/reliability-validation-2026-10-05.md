@@ -1,5 +1,7 @@
 # 信息源可靠性改进：实施与验收记录
 
+> 历史本机版记录：以下实际 AI 调用来自当时的兼容服务，不能作为公开版 OpenRouter 真实联调的证明。当前对接见 [OpenRouter 发布版说明](openrouter-publication.md)。
+
 日期：2026-10-05（Asia/Shanghai）。 后续更新：用户已配置SerpAPI，Google/Bing真实联调完成，结果与当前预览状态见[SerpAPI专项记录](serpapi-validation-2026-10-05.md)。以下保留当时尚缺Key的历史验证边界。用户已确认方案，本轮完成代码、迁移、自动化验证和可用的真实来源联调，等待页面验收。Google/Bing 缺少本机 `SERPAPI_API_KEY`，用户明确选择稍后配置，因此不能把适配器测试描述为真实搜索账户联调。代码尚未提交 Git。
 
 ## 已实现
@@ -40,7 +42,7 @@
 | RSS综合扫描 | 近24小时1条；其中一次DeepMind返回Pi Tag解析失败，记录partial、不推进成功边界；随后上述逐源复测成功 |
 | GitHub Releases | vercel/next.js近7天返回10条实际Release，包含明确标注的预发布；增量扫描窗口为空不伪造发布 |
 | HTML原文 | Hugging Face ThinkingBox全文提取与发布时间成功；X外链JetBrains正文成功但日期未知；某HN外链无可提取正文，失败状态保留 |
-| PackyAPI | deepseek-v4-pro/json_object，最后批次6条、4个事件、8179 tokens；结构和逐字引用通过本地校验 |
+| 历史兼容 AI 服务 | deepseek-v4-pro/json_object，最后批次6条、4个事件、8179 tokens；结构和逐字引用通过本地校验 |
 | Google/Bing | 缺Key，真实账户联调未执行；协议、缓存、预算与错误分支模拟测试通过 |
 | 通知 | 最后真实批次0条新通知：材料为历史基线/未满足提醒条件；未发送历史邮件 |
 

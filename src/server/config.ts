@@ -128,7 +128,7 @@ export function getSettings(): Settings {
     xDailyRequestLimit: 144,
     xMonthlyRequestLimit: 4320,
     xRequestsPerScan: 3,
-    thinkingMode: "disabled",
+    thinkingMode: "auto",
     analysisEnabled: false,
     xContextDailyLimit: 10,
     aiDailyCallLimit: 60,
@@ -139,7 +139,7 @@ export function getSettings(): Settings {
     webPages: 1,
     defaultInterval: Number(process.env.SCAN_INTERVAL_MINUTES) || 30,
     model: process.env.AI_MODEL || "",
-    baseUrl: process.env.PACKY_BASE_URL || "https://cf.api.fan/v1",
+    baseUrl: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
     outputMode: (process.env.AI_OUTPUT_MODE ||
       "json_object") as Settings["outputMode"],
     maxPages: Math.min(10, Number(process.env.SCAN_MAX_PAGES) || 3),
@@ -182,7 +182,7 @@ export function getHealth(): Health {
   const workerAt = readSetting<number | null>("workerAt", null);
   return {
     x: Boolean(process.env.TWITTERAPI_API_KEY),
-    ai: Boolean(process.env.PACKY_API_KEY && getSettings().model),
+    ai: Boolean(process.env.OPENROUTER_API_KEY && getSettings().model),
     email: emailConfigured(),
     github: Boolean(process.env.GITHUB_TOKEN),
     search: Boolean(process.env.SERPAPI_API_KEY),

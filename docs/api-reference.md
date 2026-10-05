@@ -2,20 +2,17 @@
 
 检索日期：2026-10-03（Asia/Shanghai）。优先 Context7 MCP resolve_library_id → query_docs；缺失产品或需要当前官网资料时使用 Firecrawl MCP 官方页面 scrape。索引中的 main/canary 示例需与实际安装的稳定版本核对，检索日期不代表每份索引都绝对最新。以下为实现采用的依据。
 
-## PackyAPI（当前使用）
+## OpenRouter（当前公开版）
 
-Context7 搜索 PackyAPI 未找到对应官方库，随后使用 Firecrawl MCP 阅读：
+2026-10-05 通过 Context7 `/openrouterteam/docs` 核对标准 Chat Completions 端点 `https://openrouter.ai/api/v1/chat/completions`、Bearer 鉴权、完整模型 ID、JSON 对象/Schema 输出及统一 `reasoning` 参数。公开版改用 `OPENROUTER_API_KEY` 和 `OPENROUTER_BASE_URL`；不发送用于平台排名的可选请求头。
 
-- https://docs.packyapi.com/docs/register/6-cli.html
-- https://docs.packyapi.com/docs/register/4-token.html
-- https://docs.packyapi.com/docs/token/2-group.html
-- https://docs.packyapi.com/docs/cli/6-grok-build.html
+- https://openrouter.ai/docs/quickstart
+- https://openrouter.ai/docs/guides/features/structured-outputs
+- https://openrouter.ai/docs/guides/best-practices/reasoning-tokens
 
-官方说明推荐 API 地址 https://cf.api.fan，并在兼容配置中使用 /v1。用户提供的平台地址 https://www.packyapi.ai 可在本机设置中作为候选接口配置；它的实际 Chat Completions 能力没有带凭证验证。
+模型参数能力各异；默认使用模型推理设置。关闭推理采用 `reasoning: {enabled: false}`，强制推理的模型可能拒绝。文档依据和模拟测试不替代真实账户验证；本次没有 OpenRouter Key，未发起真实请求。详见 [公开版迁移验证](openrouter-publication.md)。
 
-采用 Bearer 令牌的兼容 Chat Completions REST，端点由 baseUrl 规范化成 /v1/chat/completions；令牌分组控制模型与渠道，模型 ID 需按实际控制台填写。不能把 OpenRouter 的模型前缀、provider 参数或结构化能力直接移植过来。
-
-兼容 JSON 请求结构另通过 Context7 `/websites/developers_openai_api_reference` 核对。严格 JSON Schema、JSON 对象与提示词 JSON 三种模式按实际模型选择，所有返回都会本地校验。文档上的协议示例不等于已验证所有 Packy 分组支持严格 Schema；须通过页面连接测试和实际监控批次验证。
+下方日期较早的真实 AI 测试来自历史本机兼容服务，不是 OpenRouter 联调记录。
 
 ## X / twitterapi.io（必需可用渠道）
 
@@ -84,30 +81,9 @@ RSS 联调发现 curl 成功、Node fetch 超时，确认本机代理环境已�
 - https://nodejs.org/docs/latest-v24.x/api/cli.html#--use-env-proxy
 - https://nodejs.org/docs/latest-v24.x/api/http.html#built-in-proxy-support
 
-## 已被替换的方案
+## 历史本机 AI 验证
 
-初始按用户要求通过 Context7 `/openrouterteam/docs` 查询 OpenRouter；用户随后指定 PackyAPI，最终实现已替换。上述旧资料仅为查询历史，不再作为当前供应商的能力依据，也不保留 OpenRouter 请求或默认模型。
-
-## 2026-10-04 真实凭证验证进展
-
-X 真实搜索返回 20 条推文；QQ SMTP 认证通过并接受配置的目标地址，实际收件箱仍待用户确认。X 的完整监控分页尚需端到端扫描验证。
-
-首轮 Packy 令牌的 `/v1/models` 返回的模型均标记 `supported_endpoint_types: ["openai-response"]`；当时配置的 `gpt-5.6-sol` 调用 Chat Completions 返回 HTTP 400，错误码 `protocol_not_supported`。独立 Responses 请求又返回 HTTP 403，明确要求标准 Codex 客户端。未伪装客户端，也未将此诊断算作 AI 联调成功。
-
-本次按规则先查询 Context7 PackyAPI（无匹配库），再经 Firecrawl MCP 阅读官方分组和 Codex 指南。官方 Codex 指南配置 `wire_api = "responses"`，但分组介绍的第三方接入说明不能替代当前令牌的真实权限验证：
-
-- https://docs.packyapi.com/docs/token/2-group.html
-- https://docs.packyapi.com/docs/cli/3-codex.html
-
-Responses 请求结构另通过 Context7 `/websites/developers_openai_api_reference` 核对；兼容协议文档不能证明 Packy 允许本项目调用。当前项目仍使用 Chat Completions。
-
-用户更新为 deepseek-v4-pro 后，真实上游返回 `This response_format type is unavailable now`，拒绝 json_schema。通过 Context7 `/websites/api-docs_deepseek` 查询 JSON Output 文档，核对 response_format 支持 text / json_object，提示词需要明确 JSON。随后独立请求实测 json_object 成功，将正式工作台输出模式保存为 json_object；正式 POST /api/connections/ai 返回 200，本地校验 ok=true。独立临时数据库中的真实扫描进一步通过结构和逐字引用校验。DeepSeek 文档描述协议，不替代 Packy 的真实兼容性验证。
-
-- https://api-docs.deepseek.com/guides/json_mode
-- https://api-docs.deepseek.com/api/create-chat-completion
-
-完整结果见 [连接测试记录](connection-test-2026-10-04.md)。
-
+早期私有配置曾遇到 Chat Completions 协议权限不匹配以及模型不支持严格 JSON Schema 的问题；未伪装客户端或放宽校验。后续在当时可用模型的 JSON 对象模式完成真实小样本验证。公开版不沿用其供应商地址、模型 ID 或专用 thinking 字段，也不把这些旧结果算作 OpenRouter 已验证。历史样本范围见 [连接测试记录](connection-test-2026-10-04.md)。
 
 ## 2026-10-05 分阶段分析
 
@@ -115,12 +91,12 @@ Responses 请求结构另通过 Context7 `/websites/developers_openai_api_refere
 
 通过 Context7 `/llmstxt/twitterapi_io_llms_txt` 核对 Advanced Search 分页和 `GET /twitter/tweets?tweet_ids=` 父帖查询；通过 `/websites/serpapi` 核对 Google start / Bing first 分页差异。分页和根帖恢复主要由独立数据库回归验证，不能把模拟响应当真实外部联调。
 
-Packy 在 Context7 无匹配库，经 Firecrawl MCP 重读官方 https://docs.packyapi.com/docs/register/6-cli.html，确认 OpenAI 兼容地址加 `/v1`；该页不证明具体模型的输出模式兼容性。通过 Context7 `/websites/api-docs_deepseek` 重新核对 JSON Output 的 json_object、提示词 JSON 和 max_tokens 截断边界：https://api-docs.deepseek.com/guides/json_mode 。本轮先不假定 thinking / reasoning_effort 兼容；随后在 Packy 的 deepseek-v4-pro 真实请求中验证 `thinking: {type: "disabled"}`，该字段仅用于精确匹配的这个模型及 screen/deep 阶段。其他模型保持原配置，不新增未经验证的 reasoning_effort。
+历史兼容服务 在 Context7 无匹配库，经 Firecrawl MCP 重读官方 历史兼容服务文档（不再作为当前协议依据），确认 OpenAI 兼容地址加 `/v1`；该页不证明具体模型的输出模式兼容性。通过 Context7 `/websites/api-docs_deepseek` 重新核对 JSON Output 的 json_object、提示词 JSON 和 max_tokens 截断边界：https://api-docs.deepseek.com/guides/json_mode 。本轮先不假定 thinking / reasoning_effort 兼容；随后在 历史兼容服务 的 deepseek-v4-pro 真实请求中验证 `thinking: {type: "disabled"}`，该字段仅用于精确匹配的这个模型及 screen/deep 阶段。其他模型保持原配置，不新增未经验证的 reasoning_effort。
 
 真实测试发现临时库未继承 UI 保存的 json_object 配置，旧、新分析都 HTTP 400；复制已有已验证模型/模式后复测。不静默降级正式库的模式，不放宽本地校验。Next 16.3.8 的 Route Handlers 和 Server/Client Components 指南从本机安装包读取，API 使用异步 params，交互组件保持客户端边界。
 
 
-通过 Context7 MCP `/colinhacks/zod` 核对 Zod 4 动态 enum、strict object、extend 与 z.toJSONSchema。引用锚点是本项目实现：输入服务器生成的连续短原文片段，输出动态允许的 quoteId，再在本地验证 articleId 归属和逐项引用集合。此协议在 Packy json_object 模式下真实通过；并不意味着供应商支持严格 json_schema，也不证明引用内容的语义绝对真实。结果、费用与模型兼容边界见 [V2 验收记录](analysis-pipeline-v2-validation-2026-10-05.md)。
+通过 Context7 MCP `/colinhacks/zod` 核对 Zod 4 动态 enum、strict object、extend 与 z.toJSONSchema。引用锚点是本项目实现：输入服务器生成的连续短原文片段，输出动态允许的 quoteId，再在本地验证 articleId 归属和逐项引用集合。此协议在 历史兼容服务 json_object 模式下真实通过；并不意味着供应商支持严格 json_schema，也不证明引用内容的语义绝对真实。结果、费用与模型兼容边界见 [V2 验收记录](analysis-pipeline-v2-validation-2026-10-05.md)。
 
 ## 2026-10-05 X 精选账号、互动复查与筛选
 

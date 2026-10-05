@@ -92,7 +92,7 @@ function model(patch?: (input: any, output: any) => unknown) {
 }
 beforeEach(() => {
   vi.stubEnv("DATABASE_URL", "/tmp/signal-v2-test-" + randomUUID() + ".db");
-  vi.stubEnv("PACKY_API_KEY", "test-packy-key");
+  vi.stubEnv("OPENROUTER_API_KEY", "test-openrouter-key");
   vi.stubEnv("AI_MODEL", "test-model");
   vi.stubEnv("AI_OUTPUT_MODE", "json_object");
   vi.stubEnv("TWITTERAPI_API_KEY", "test-x-key");
@@ -580,8 +580,9 @@ it("过期租约的迟到响应不能覆盖新 worker 的候选或租约", async
   expect(dashboard().pipeline.candidates.queued).toBe(1);
 });
 
-it("仅已验证的 DeepSeek v4 Pro 分阶段请求携带稳定输出参数", async () => {
-  vi.stubEnv("AI_MODEL", "deepseek-v4-pro");
+it("OpenRouter 分阶段请求使用统一推理参数，默认模式和连接测试不强制关闭", async () => {
+  vi.stubEnv("AI_MODEL", "deepseek/deepseek-chat");
+  writeSetting("app", { thinkingMode: "disabled" });
   const bodies: Record<string, unknown>[] = [];
   const f = (async (_url: string | URL | Request, init?: RequestInit) => {
     bodies.push(JSON.parse(String(init?.body)));
@@ -591,15 +592,16 @@ it("仅已验证的 DeepSeek v4 Pro 分阶段请求携带稳定输出参数", as
     });
   }) as Fetcher;
   await aiCompletion([], {}, 100, f, { stage: "deep", jobId: "verified-deep" });
-  expect(bodies[0].thinking).toEqual({ type: "disabled" });
+  expect(bodies[0].reasoning).toEqual({ enabled: false });
+  expect(bodies[0].thinking).toBeUndefined();
   await aiCompletion([], {}, 100, f, {
     stage: "connection",
     jobId: "connection",
   });
-  expect(bodies[1].thinking).toBeUndefined();
+  expect(bodies[1].reasoning).toBeUndefined();
   writeSetting("app", { thinkingMode: "auto" });
   await aiCompletion([], {}, 100, f, { stage: "deep", jobId: "explicit-auto" });
-  expect(bodies[2].thinking).toBeUndefined();
+  expect(bodies[2].reasoning).toBeUndefined();
 });
 
 it("深度引用锚点还原连续原文，拒绝未知、错配、重复引用和模型改写", async () => {

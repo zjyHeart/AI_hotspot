@@ -19,7 +19,7 @@ import {
   validatePublicUrl,
 } from "@/server/http";
 import { testMail } from "@/server/mail";
-import { aiCompletion, packyEndpoint } from "@/server/ai-client";
+import { aiCompletion, openRouterEndpoint } from "@/server/ai-client";
 import { getDb } from "@/server/db";
 import { monitors } from "@/server/schema";
 import { eq } from "drizzle-orm";
@@ -178,7 +178,7 @@ async function handle(request: Request, context: Context) {
     }
     if (method === "PUT" && resource === "settings") {
       const input = settingsInput.parse(body);
-      packyEndpoint(input.baseUrl);
+      openRouterEndpoint(input.baseUrl);
       if (input.xAccounts)
         for (const a of input.xAccounts) {
           const u = await validatePublicUrl(a.proofUrl);
@@ -273,7 +273,7 @@ async function handle(request: Request, context: Context) {
       );
       z.object({ ok: z.literal(true) }).parse(result.parsed);
       return respond({
-        message: `PackyAPI 连接正常，${getSettings().outputMode} 模式返回 JSON 并通过本地校验`,
+        message: `OpenRouter 连接正常，${getSettings().outputMode} 模式返回 JSON 并通过本地校验`,
         ok: true,
       });
     }

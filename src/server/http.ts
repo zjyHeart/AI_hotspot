@@ -16,7 +16,6 @@ export function safeError(error: unknown) {
   let sanitized = message.slice(0, 400);
   for (const key of [
     "SERPAPI_API_KEY",
-    "PACKY_API_KEY",
     "OPENROUTER_API_KEY",
     "TWITTERAPI_API_KEY",
     "GITHUB_TOKEN",

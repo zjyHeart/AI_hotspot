@@ -1,5 +1,7 @@
 # 信息质量改进：扩大采集与分层 AI 分析（用户已确认，实施记录另见验收报告）
 
+> 历史本机版记录：以下实际 AI 调用来自当时的兼容服务，不能作为公开版 OpenRouter 真实联调的证明。当前对接见 [OpenRouter 发布版说明](openrouter-publication.md)。
+
 日期：2026-10-05。用户已确认按此方案开发。本文保留确认时的设计；最终实现范围和真实验证以 [实施验收记录](analysis-pipeline-v2-validation-2026-10-05.md) 为准。
 
 ## 目标
@@ -74,5 +76,5 @@
 
 - TwitterAPI.io `/llmstxt/twitterapi_io_llms_txt`：Advanced Search 支持 Latest/Top、cursor、has_next_page、next_cursor，每页最多约 20 条、可能更少；返回 isReply/inReplyToId。https://docs.twitterapi.io/api-reference/endpoint/tweet_advanced_search
 - SerpAPI `/websites/serpapi`：Google 分页使用 start；Bing 使用 first，过滤参数为 filters，不能直接复用 Google 参数。https://serpapi.com/pagination 、https://serpapi.com/bing-search-api
-- 不把检索覆盖当成全网覆盖；操作符、分页边界、线程追溯和新增查询效果均须独立真实联调。此次只查文档和代码，没有发起付费 X、SerpAPI 或 PackyAPI 调用。
-- 分层 AI 是本项目的设计建议，不是供应商已经提供的自动事实核查能力。PackyAPI 输出模式继续使用已验证兼容配置，新增协议需求再优先查 Context7、缺失时查官方资料。
+- 不把检索覆盖当成全网覆盖；操作符、分页边界、线程追溯和新增查询效果均须独立真实联调。此次只查文档和代码，没有发起付费 X、SerpAPI 或 历史兼容 AI 服务 调用。
+- 分层 AI 是本项目的设计建议，不是供应商已经提供的自动事实核查能力。历史兼容 AI 服务 输出模式继续使用已验证兼容配置，新增协议需求再优先查 Context7、缺失时查官方资料。

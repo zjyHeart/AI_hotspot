@@ -1,5 +1,7 @@
 # 真实连接测试记录
 
+> 历史本机版记录：以下实际 AI 调用来自当时的兼容服务，不能作为公开版 OpenRouter 真实联调的证明。当前对接见 [OpenRouter 发布版说明](openrouter-publication.md)。
+
 日期：2026-10-04（Asia/Shanghai）。用户授权测试已配置服务；本次使用实际服务请求，不使用模拟数据，不记录凭证或邮箱地址。
 
 ## 首轮结果（已被后续 AI 重测更新）
@@ -9,11 +11,11 @@
 | Web | 本机开发服务启动，GET /api/dashboard 返回 200 | 配置状态仅表示字段存在，不代表外部连接通过 |
 | X / twitterapi.io | POST /api/connections/x 返回 200；AI 关键词的真实 Latest 搜索返回 20 条推文 | 消耗真实 API 额度；不等于完整扫描与分页验证 |
 | QQ SMTP | POST /api/connections/email 返回 200；verify 通过，sendMail 的 accepted 包含目标地址 | 测试邮件标题为 [Signal Desk] 邮件连接测试；用户尚需检查实际收件箱或垃圾邮件 |
-| PackyAPI | POST /api/connections/ai 返回 502；上游 Chat Completions 返回 400 | 未通过，尚未生成 AI 热点 |
+| 历史兼容 AI 服务 | POST /api/connections/ai 返回 502；上游 Chat Completions 返回 400 | 未通过，尚未生成 AI 热点 |
 
 ## 首轮 AI 失败诊断
 
-1. 生效模型为 gpt-5.6-sol，API 地址为 https://cf.api.fan/v1，输出模式为 json_schema。
+1. 生效模型为 gpt-5.6-sol，API 地址为 历史私有接口（不再作为公开版配置），输出模式为 json_schema。
 2. 上游错误码为 protocol_not_supported，明确表示模型不支持 chat completions 协议。不是由本次证据确认的 JSON Schema 参数错误。
 3. GET /v1/models 返回 200，当前令牌的模型均标记仅支持 openai-response。
 4. 独立 POST /v1/responses 请求返回 403，服务商要求使用标准 Codex 客户端。因此只增加 Responses 适配仍不足以证明当前令牌可供本项目使用，未修改协议实现或伪装客户端。
@@ -25,19 +27,16 @@
 
 ## 文档依据
 
-Context7 优先查询 PackyAPI，无匹配库；随后 Firecrawl MCP 核对 Packy 官方文档。协议结构经 Context7 的 OpenAI API Reference 查询，实际服务能力以上游请求结果为准。
+Context7 优先查询 历史兼容 AI 服务，无匹配库；随后 Firecrawl MCP 核对 历史兼容服务 官方文档。协议结构经 Context7 的 OpenAI API Reference 查询，实际服务能力以上游请求结果为准。
 
-- https://docs.packyapi.com/docs/token/2-group.html
-- https://docs.packyapi.com/docs/cli/3-codex.html
-- https://docs.packyapi.com/docs/register/6-cli.html
 
 先前 32 项模拟业务测试与构建结果见 acceptance.md，本次没有重复执行，不能代替此次真实账户联调。
 
 ## 用户更新配置后的重测
 
-Web 和正式 worker 已重启。生效模型为 deepseek-v4-pro，地址仍为 https://cf.api.fan/v1。该模型的真实响应拒绝 json_schema 参数，错误为 `This response_format type is unavailable now`。通过 Context7 查询 DeepSeek 官方 JSON Output 文档后，先在独立内存数据库使用 json_object 实测成功，再保存正式工作台输出模式为 json_object。项目继续使用本地结构校验和原文逐字引用校验，没有放宽业务验证。
+Web 和正式 worker 已重启。生效模型为 deepseek-v4-pro，地址仍为 历史私有接口（不再作为公开版配置）。该模型的真实响应拒绝 json_schema 参数，错误为 `This response_format type is unavailable now`。通过 Context7 查询 DeepSeek 官方 JSON Output 文档后，先在独立内存数据库使用 json_object 实测成功，再保存正式工作台输出模式为 json_object。项目继续使用本地结构校验和原文逐字引用校验，没有放宽业务验证。
 
-正式 POST /api/connections/ai 返回 200，响应为 PackyAPI 连接正常，json_object 模式返回 JSON 并通过本地校验。本次没有重复发送 SMTP 测试邮件。
+正式 POST /api/connections/ai 返回 200，响应为 历史兼容 AI 服务 连接正常，json_object 模式返回 JSON 并通过本地校验。本次没有重复发送 SMTP 测试邮件。
 
 ## 独立数据库中的真实采集与分析
 

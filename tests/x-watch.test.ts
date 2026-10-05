@@ -119,7 +119,7 @@ beforeEach(() => {
     "/tmp/signal-x-watch-test-" + randomUUID() + ".db",
   );
   vi.stubEnv("TWITTERAPI_API_KEY", "synthetic-x-key");
-  vi.stubEnv("PACKY_API_KEY", "synthetic-ai-key");
+  vi.stubEnv("OPENROUTER_API_KEY", "synthetic-ai-key");
   vi.stubEnv("AI_MODEL", "test-model");
   for (const key of [
     "SMTP_HOST",

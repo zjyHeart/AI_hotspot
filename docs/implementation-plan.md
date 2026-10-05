@@ -1,6 +1,8 @@
 # Signal Desk 实施方案与进度
 
-日期：2026-10-03。用户已授权开始开发；本文件记录最终实现，不要求重复批准设计。用户后续指定 PackyAPI 替代 OpenRouter、X 必需、默认每 30 分钟采集、站内通知与邮件提醒。
+> 历史本机版记录：以下实际 AI 调用来自当时的兼容服务，不能作为公开版 OpenRouter 真实联调的证明。当前对接见 [OpenRouter 发布版说明](openrouter-publication.md)。
+
+日期：2026-10-03。用户已授权开始开发；本文件记录最终实现，不要求重复批准设计。用户后续指定 历史兼容 AI 服务 替代 OpenRouter、X 必需、默认每 30 分钟采集、站内通知与邮件提醒。
 
 ## 首版范围
 
@@ -20,9 +22,9 @@
 
 ## 技术与执行流程
 
-Next.js 16.3.8 / React 19.3.0 / Tailwind 4.3.3；Drizzle + better-sqlite3；PackyAPI REST Chat Completions；Nodemailer SMTP；独立 Node worker。准确版本由 package-lock.json 锁定，MCP 来源见 api-reference.md。
+Next.js 16.3.8 / React 19.3.0 / Tailwind 4.3.3；Drizzle + better-sqlite3；历史兼容 AI 服务 REST Chat Completions；Nodemailer SMTP；独立 Node worker。准确版本由 package-lock.json 锁定，MCP 来源见 api-reference.md。
 
-到期频道 → 来源采集 → 来源 ID 去重及保存检查点 → PackyAPI 分析 → 结构和引用校验 → 事件聚合与热度计算 → 站内通知 → 邮件队列。
+到期频道 → 来源采集 → 来源 ID 去重及保存检查点 → 历史兼容 AI 服务 分析 → 结构和引用校验 → 事件聚合与热度计算 → 站内通知 → 邮件队列。
 
 SQLite 共 10 张表，保存频道、原文、关联、来源检查点、互动采样、事件、扫描、通知、投递尝试与偏好。事务和 15 分钟租约限制同一频道并发领取；崩溃后旧任务在重新领取时标为中断。Web 与 worker 使用相同配置加载与数据库。
 
@@ -32,11 +34,11 @@ AI 每轮默认处理 12 条，剩余候选与失败批次留在队列。热度�
 
 首次扫描读取近期内容建立基线，发布时间早于频道创建的内容不触发历史提醒。待核实提醒默认关闭，争议信息不提醒，冷却期限制重复提醒。SMTP 有有限重试、目标地址接受检查和崩溃租约恢复。
 
-## PackyAPI 替换
+## 历史兼容 AI 服务 替换
 
-已移除 OpenRouter 专属请求字段、请求头和模型预设。配置采用 PACKY_API_KEY、PACKY_BASE_URL、AI_MODEL、AI_OUTPUT_MODE，界面支持接口地址、模型与输出模式切换。
+已移除 OpenRouter 专属请求字段、请求头和模型预设。配置采用 历史 AI Key、历史 AI 地址、AI_MODEL、AI_OUTPUT_MODE，界面支持接口地址、模型与输出模式切换。
 
-Context7 未提供 Packy 文档，改用 Firecrawl MCP 阅读 Packy 官方资料。官方推荐接口为 https://cf.api.fan/v1，用户给出的 https://www.packyapi.ai/v1 也作为可选地址支持；是否提供对应协议须用真实账户测试。
+Context7 未提供 历史兼容服务 文档，改用 Firecrawl MCP 阅读 历史兼容服务 官方资料。官方推荐接口为 历史私有接口（不再作为公开版配置），用户给出的 历史私有接口 也作为可选地址支持；是否提供对应协议须用真实账户测试。
 
 模型由令牌分组决定；严格 JSON Schema 能力不能由其他平台的支持情况推断。所有输出模式均经过本地校验。不支持格式、认证失败、限流或超时都会显示实际错误。
 
@@ -46,8 +48,8 @@ Context7 未提供 Packy 文档，改用 Firecrawl MCP 阅读 Packy 官方资料
 | --- | --- | --- |
 | 方案和文档查询 | 已完成，已获得开发授权 | MCP 官方来源、确定数据和提醒流程 |
 | 页面、数据库、采集和后台 | 已实现 | 浏览器创建/编辑持久化、公开来源真实采集 |
-| Packy 分析、证据和提醒 | 已实现，凭证联调待完成 | 模拟正常/失败链路和独立数据库测试 |
-| Web 验收 | 等待真实 X / Packy / SMTP 配置及用户验收 | acceptance.md |
+| 历史兼容服务 分析、证据和提醒 | 已实现，凭证联调待完成 | 模拟正常/失败链路和独立数据库测试 |
+| Web 验收 | 等待真实 X / 历史兼容服务 / SMTP 配置及用户验收 | acceptance.md |
 | 应用 Agent Skill | 待 Web 验收后开发 | 用户明确要求的顺序 |
 
 ## 实施边界

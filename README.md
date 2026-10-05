@@ -2,17 +2,24 @@
 
 一个面向 AI 编程与 Agent 等领域的本机热点监控工作台。它把多渠道线索转为可追溯的技术情报：先采集与基础过滤，再用 AI 初筛、聚合事件和逐项核验，最终展示摘要、影响与原文依据。
 
-AI 接入 **PackyAPI**，X 接入 **twitterapi.io**，Google/Bing 使用 **SerpAPI**；站内通知和 SMTP 邮件支持持续提醒。频道默认每 **30 分钟**采集一次。项目还包含一个独立的 **Agent Skill**，通过已有 HTTP API 操作服务。
+AI 接入 **OpenRouter**，X 接入 **twitterapi.io**，Google/Bing 使用 **SerpAPI**；站内通知和 SMTP 邮件支持持续提醒。频道默认每 **30 分钟**采集一次。项目还包含一个独立的 **Agent Skill**，通过已有 HTTP API 操作服务。
 
 > 当前为单用户、本机使用版本。没有登录与多租户隔离，请保持 loopback 绑定；公开 GitHub 源码不等于可以直接把运行服务暴露到公网。仓库及源码包不包含密钥、邮箱账户、数据库或实际采集数据。
 
+## 页面预览
+
+![Signal Desk 最新情报首页](docs/images/home-desktop.jpg)
+
+实际运行页面截图：浅色阅读区、深色导航、更新/刷新入口、后台进度和来源信息。展示此前真实采集的公开单条样本；截图服务未配置上游凭证、未启动 worker，故如实显示后台停止。此图仅展示界面，不证明 OpenRouter 已真实联调。
+
 ## 目录
 
+- [页面预览](#页面预览)
 - [主要功能](#主要功能)
 - [第一次使用](#第一次使用)
 - [过滤信息的实现](#过滤信息的实现)
 - [运行](#运行)
-- [PackyAPI 配置](#packyapi-配置)
+- [OpenRouter 配置](#openrouter-配置)
 - [邮件配置](#邮件配置)
 - [采集、分析与提醒](#采集分析与提醒)
 - [AI 编程与 Agent 账号监控及筛选](#ai-编程与-agent-账号监控及筛选)
@@ -37,7 +44,7 @@ AI 接入 **PackyAPI**，X 接入 **twitterapi.io**，Google/Bing 使用 **SerpA
 
 ## 第一次使用
 
-1. 按“运行”安装依赖，按“PackyAPI 配置”和“邮件配置”创建本机环境文件。
+1. 按“运行”安装依赖，按“OpenRouter 配置”和“邮件配置”创建本机环境文件。
 2. 分别启动 Web 与 worker，两者使用同一 `DATABASE_URL`（默认 `data/hotspot.db`）。
 3. 在“监控频道”创建关键词或领域频道；关注 AI 编程可应用专题，使用精选账号和标准互动策略。需要持续采集时启用频道。
 4. 首页选择频道，点击 **更新情报**；顶部显示采集、AI 初筛、深度核验、排队、预算暂停或等待重试。
@@ -109,24 +116,26 @@ rtk proxy npm start
 
 仍需另开终端运行 worker。Web 默认绑定本机 loopback，worker 是本机后台进程；首版没有登录、多用户或公网部署能力。
 
-## PackyAPI 配置
+## OpenRouter 配置
 
 从 .env.example 新建 .env.local；已有 .env.local 时只编辑所需项，保留原配置。密钥只在服务端读取，请勿使用 NEXT_PUBLIC_ 前缀。
 
 ```dotenv
-PACKY_API_KEY=填写你的令牌
-PACKY_BASE_URL=https://cf.api.fan/v1
-AI_MODEL=填写令牌分组可用的模型ID
+OPENROUTER_API_KEY=填写你的令牌
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+AI_MODEL=填写模型列表中的完整vendor/model ID
 AI_OUTPUT_MODE=json_object
 TWITTERAPI_API_KEY=填写twitterapi.io的Key
 SERPAPI_API_KEY=可选，Google与Bing共用一个Key
 ```
 
-通过 MCP 阅读的 [Packy 官方文档](https://docs.packyapi.com/docs/register/6-cli.html) 推荐 `https://cf.api.fan/v1`。用户提供的 `https://www.packyapi.ai` 也可以在“连接与设置”填写为 `https://www.packyapi.ai/v1`，实际 API 连通性须用账户测试确认。应用会规范化 `/v1/chat/completions`，只向允许的 Packy 域名发送令牌。
+从 [OpenRouter Keys](https://openrouter.ai/settings/keys) 创建 Key，在 [模型列表](https://openrouter.ai/models) 选择模型并填写完整 `vendor/model` ID。标准地址为 `https://openrouter.ai/api/v1`，程序只向该官方 HTTPS 域名发送令牌，不提供推广排名请求头。没有预设收费模型；请自行确认模型可用性、价格和参数支持。
 
-模型名称由令牌分组决定，不套用其他平台的模型 ID。页面支持严格 JSON Schema、JSON 对象、提示词 JSON 三种模式，按模型能力选择；每一种模式都会在本地校验响应结构和引用原文。服务不支持当前模式时会明确失败，保留原始内容，不会静默伪造分析结果。
+公开版使用 Chat Completions，支持 `json_schema`、`json_object` 与提示词 JSON 模式。默认 `json_object`，仍需选择支持该模式的模型；所有返回继续经过本地 Schema 与逐字引用校验。模型不支持当前模式时保留材料并报告失败，不静默切换模型或降低校验要求。
 
-2026-10-04 已真实验证 `deepseek-v4-pro` 配合 `json_object` 模式可用；该次请求不支持 `json_schema`。使用这个模型时，将 `AI_OUTPUT_MODE` 设为 `json_object`，或在“连接与设置”选择“JSON 对象模式”。模型与令牌权限仍以当前分组为准。
+推理默认遵循模型设置；可在页面请求关闭推理，分阶段请求使用 OpenRouter 的 `reasoning: {enabled: false}`。部分模型强制推理，关闭参数可能返回错误；应切回默认模式或选择支持关闭的模型。本次依据 Context7 查询 OpenRouter 官方文档完成适配和模拟回归，没有 OpenRouter 账户凭证，**尚未进行 OpenRouter 真实调用**。历史本机版的 AI 验收不能作为此平台已联调的证明。
+
+从旧版本迁移时先备份数据库，填写新的 OpenRouter 环境变量后重启 Web 和 worker，并在“连接与设置”保存新地址、完整模型 ID、输出模式及默认推理设置；程序不自动改写已有频道或数据库中的 AI 配置。
 
 “连接与设置”的偏好保存在数据库，优先于环境默认值；模型为空时回退到 AI_MODEL。默认扫描间隔只影响新频道，已有频道请单独编辑。API Key / SMTP 修改后重启 Web 和 worker；页面偏好无需重启。
 
@@ -186,7 +195,7 @@ rtk proxy npm run build
 rtk proxy npm audit
 ```
 
-结构：`src/app` 页面和 API；`src/server/sources.ts` 采集；`ai-client.ts` Packy 协议；`analysis-stages.ts` 分层分析；`ai.ts` 证据校验；`ai-budget.ts` 费用审计；`pipeline.ts` 分阶段队列；`article-store.ts` 去重持久化；`scanner.ts` 采集调度；`mail.ts` 投递；`scripts/worker.ts` 常驻后台。
+结构：`src/app` 页面和 API；`src/server/sources.ts` 采集；`ai-client.ts` OpenRouter 协议；`analysis-stages.ts` 分层分析；`ai.ts` 证据校验；`ai-budget.ts` 费用审计；`pipeline.ts` 分阶段队列；`article-store.ts` 去重持久化；`scanner.ts` 采集调度；`mail.ts` 投递；`scripts/worker.ts` 常驻后台。
 
 分阶段方案见 [分析流程方案](docs/analysis-pipeline-v2-plan.md)，最终实现、95 项回归、真实材料对照、调用费用边界与当前验收入口见 [V2 验收记录](docs/analysis-pipeline-v2-validation-2026-10-05.md)。
 
@@ -249,7 +258,7 @@ Agent 使用示例：
 | Web | Next.js 16.3.8 App Router + React 19.3.0 + TypeScript，浅色内容区/深色侧栏 |
 | 视觉 | Tailwind CSS 4.3.3、Aceternity UI Spotlight/Bento；轻量效果与 reduced-motion 适配 |
 | 数据 | SQLite + better-sqlite3 13.0.3 + Drizzle 0.45.3；持久化队列、租约、审计及增量迁移 |
-| AI | PackyAPI OpenAI 兼容 Chat Completions；Zod 4 结构和本地引用校验 |
+| AI | OpenRouter OpenAI 兼容 Chat Completions；Zod 4 结构和本地引用校验 |
 | 正文 | Mozilla Readability + JSDOM；公开 URL 校验、重定向逐跳校验和大小/并发上限 |
 | 后台 | 独立 Node worker；采集、初筛、深度、邮件分阶段处理 |
 | Skill | Python 3.9+ 标准库，调用现有 HTTP API，无本地数据库直读 |
@@ -285,7 +294,9 @@ docs/                    方案、MCP 技术依据、真实联调及验收边界
 
 ## 验证与发布范围
 
-截至 2026-10-05，Web 最近一轮 6 个 Vitest 文件、120 项通过，类型检查、生产构建与桌面/手机浏览器验收通过。独立 Skill 的 14 项模拟 HTTP 测试通过，验证 UTF-8、重定向阻止、写入格式、离线不排队、部分编辑保留配置等；模拟测试不视为实际 X/AI 联调。Skill 另外通过已运行的隔离 Web 只读验证真实既有情报，未新增上游请求。
+公开版已切换 OpenRouter；旧文档里的实际 AI 调用来自当时的本机兼容服务，不能推断为 OpenRouter 已真实联调。当前协议和验证见 [OpenRouter 发布版说明](docs/openrouter-publication.md)。
+
+截至 2026-10-05，OpenRouter 公开版 6 个 Vitest 文件、120 项通过，类型检查、生产构建与桌面/手机浏览器验收通过。独立 Skill 的 14 项模拟 HTTP 测试通过，验证 UTF-8、重定向阻止、写入格式、离线不排队、部分编辑保留配置等；模拟测试不视为实际 X/AI 联调。Skill 另外通过已运行的隔离 Web 只读验证真实既有情报，未新增上游请求。
 
 ```sh
 rtk proxy npm test
@@ -295,6 +306,6 @@ rtk proxy python3 -B -m unittest discover -s skills/signal-desk/tests -v
 
 构建/迁移的使用见前文；验证新数据库时设置独立的 `DATABASE_URL`，不要用业务数据库做测试。实际外部调用需配置自己的账户、预算与模型；测试脚本不是免费的连通性探测，执行前查看脚本和费用边界。
 
-公开发布使用当前已审查源码快照；不上传本地旧 Git 历史、`.env`/`.env.local`、SQLite/WAL/备份、采集结果、邮件账户、运行日志、截图/测试输出、node_modules、构建缓存。本机路径在分发文档中改为通用路径，运行代码不变；压缩包和 GitHub 代码来自同一份发布快照。`.env.example` 仅含空凭证与公开服务地址。
+公开发布使用当前已审查源码快照；不上传本地旧 Git 历史、`.env`/`.env.local`、SQLite/WAL/备份、采集结果、邮件账户、运行日志、无关截图/测试输出（README 展示图除外）、node_modules、构建缓存。本机路径在分发文档中改为通用路径；本次公开版 AI 适配范围见上文，作者本机正在运行的私有配置不变；压缩包和 GitHub 代码来自同一份发布快照。`.env.example` 仅含空凭证与公开服务地址。
 
 历史联调文档中的端口、费用和样本数量仅代表当次验证；不是永久在线服务、性能承诺或供应商套餐保证。生成产物链接若指向 `output/`，在公开源码包中不可用。启动后没有伪造示例热点，真实结果需使用者按自身账户采集和分析。

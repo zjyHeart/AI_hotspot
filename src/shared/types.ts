@@ -336,7 +336,7 @@ export const settingsInput = z.object({
   xDailyRequestLimit: z.number().int().min(0).max(10000).default(144),
   xMonthlyRequestLimit: z.number().int().min(0).max(100000).default(4320),
   xRequestsPerScan: z.number().int().min(1).max(20).default(3),
-  thinkingMode: z.enum(["auto", "disabled"]).default("disabled"),
+  thinkingMode: z.enum(["auto", "disabled"]).default("auto"),
   analysisEnabled: z.boolean().default(false),
   xContextDailyLimit: z.number().int().min(0).max(1000).default(10),
   aiDailyCallLimit: z.number().int().min(0).max(10000).default(60),
