@@ -1,0 +1,4 @@
+interface:
+  display_name: "Signal Desk 热点监控"
+  short_description: "查看热点情报和原文依据，检查后台进度、管理监控频道并按需更新分析"
+  default_prompt: "使用 $signal-desk 查看 AI 编程与 Agent 的最新情报，说明来源依据和后台处理状态。"

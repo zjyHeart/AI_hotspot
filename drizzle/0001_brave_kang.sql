@@ -1,0 +1,2 @@
+ALTER TABLE `articles` ADD `metadata` text DEFAULT '{}' NOT NULL;--> statement-breakpoint
+ALTER TABLE `monitors` ADD `quality` text DEFAULT '{"excludeReplies":true,"minLikes":20,"minReposts":5,"followedAccounts":[],"blockedAccounts":[],"webIntervalMinutes":240,"githubRepos":[]}' NOT NULL;
